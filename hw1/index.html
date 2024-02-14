@@ -1,7 +1,192 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Homework 1 index.html here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184/284A Rasterizer</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184/284A: Computer Graphics and Imaging, Spring 2024</h1>
+<h1 align="middle">Homework 1: Rasterizer</h1>
+<h2 align="middle">Henry Li</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>Give a high-level overview of what you implemented in this homework Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.</p>
+
+<h2 align="middle">Section I: Rasterization</h2>
+
+<h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
+
+<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+<p>To resterize the triangle, I first formulate the function inside to determine whether a sample point is inside the given triangle. Using this function I can check for all neccessary sample points and if the sample point is inside
+    the triangle, I would fill that pixel with the color of the triangle. I improved the choice of sample points. What I did
+    is at every horizontal check, when the sample points enters then exits the triangle, I break that horizontal check and move
+    to the next column. For the basic svgs, the rendering time using bouding boxes are: 0.011, 0.005, 0.33, 0.027, 0.071, 0.045 seconds.
+    With improved algorithm, the rendering times are: 0.006, 0.005, 0.242, 0.018, 0.047, 0.032 seconds. </p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/part1.png" align="middle" width="400px"/>
+        <figcaption align="middle">basic_4.</figcaption>
+      </td>
+      
+  </table>
+</div>
+
+
+<h3 align="middle">Part 2: Antialiasing triangles</h3>
+<p>Similar to Part 1, now instead of skimming over and fill the screen buffer, we sample over a higher resolution using more sample points and store their
+    color in to the sample buffer. From there, when resolve the sample buffer to the frame buffer, for each pixel on the frame buffer, we average the corresponding
+    amount of pixels from the sample buffer. By doing this, we first created an higher resolution image in the sample buffer, and averaging down into our lower
+    resolution frame buffer, the resulting blurring effect reduces the aliasing.</p>
+<div align="middle">
+    <table style="width=100%">
+        <tr>
+            <td>
+                <img src="images/part2_1.png" align="middle" width="400px" />
+                <figcaption align="middle">basic_4 Sample Rate:1</figcaption>
+            </td>
+        </tr>
+        <br />
+        <tr>
+            <td>
+                <img src="images/part2_4.png" align="middle" width="400px" />
+                <figcaption align="middle">basic_4 Sample Rate:4</figcaption>
+            </td>
+            <td>
+                <img src="images/part2_16.png" align="middle" width="400px" />
+                <figcaption align="middle">basic_4 Sample Rate:16</figcaption>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<h3 align="middle">Part 3: Transforms</h3>
+    <p>Here I made the robot do a split. I rotate each leg by 75 degrees in opposite direction and translate them further away from each other.</p>
+<div align="middle">
+    <table style="width=100%">
+        <tr>
+           
+            <img src="images/part3.png" align="middle" width="400px" />
+            <figcaption align="middle">New Robots</figcaption>
+        </tr>   
+    </table>
+</div>
+
+<h2 align="middle">Section II: Sampling</h2>
+
+<h3 align="middle">Part 4: Barycentric coordinates</h3>
+    <p>Barycentric coordinates basically indicates the distance between an given point with each of the vertecies of the triangle. Due to convenient properties
+    of barycentric coordinates, it can be used to interpolate points/values inside the triangle with points/values of the vertecies. When the interpolated value
+    is color, the color inside the triangle is the weighted average of colors on the vertex based on each point's barycentric coordinate.</p>
+<div align="middle">
+    <table style="width=100%">
+        
+        <tr>
+           
+                <img src="images/part4.png" align="middle" width="400px" />
+                <figcaption align="middle">Triangle with Red Green Blue vertecies, and interpolated color inside.</figcaption>
+            
+        </tr>
+    </table>
+</div>
+
+<h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+    <p>The whole process of pixel sampling to perform texture mapping comes in 2 pieces. First, using barycentric interpolation, we can obtain the corresponding
+    uv coordinate of each xy sample points of the frame buffer. Then, for each of the xy sample points, we fill its pixel with color from the uv coordinate of the
+    texture image. Using nearest sampling method, we fill the color of the nearest sample point on the texture to our frame buffer. Using bilinear, we linearly
+    interpolate twice on the surrounding four nearest sample points on the texture space.</p>
+<div align="middle">
+    <table style="width=100%">
+        <tr>
+            <td>
+                <img src="images/part5_bili_1.png" align="middle" width="400px" />
+                <figcaption align="middle">Bilinear, 1 per pixel</figcaption>
+            </td>
+            <td>
+                <img src="images/part5_bili_16.png" align="middle" width="400px" />
+                <figcaption align="middle">Bilinear, 16 per pixel</figcaption>
+            </td>
+        </tr>
+        <br />
+        <tr>
+            <td>
+                <img src="images/part5_near_1.png" align="middle" width="400px" />
+                <figcaption align="middle">Nearest, 1 per pixel</figcaption>
+            </td>
+            <td>
+                <img src="images/part5_near_16.png" align="middle" width="400px" />
+                <figcaption align="middle">Nearest, 16 per pixel</figcaption>
+            </td>
+        </tr>
+    </table>
+</div>
+    <p>In areas where there are fast changes of colors and high curls, using nearest method will likely to cause more zigzags since we are not many xy coords
+    will likely be map to either close uv coord and far away uv coord. Without lerp that averaging/smoothing out the fast changes, the nearest maps will have zigzags. 
+    Yet, this drawback can be partially solved by increasing the sample rate.</p>
+
+<h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+    <p>Level sampling is a way of antialiasing used in texture mapping. In locations where the texture image is shrank in the frame there will be aliasing. To resolve it, level sampling
+    will select the best resolution of the texture image to be sampled for each xy point. To do this, we need to calculate du/dx dv/dx du/dy dv/dy using barycentric
+    coordinate and use them to find the continuous optimal level D. With nearest method, we just find the nearest interger level of D. With Linear Interpolation, we 
+    lerp the output of the closest two interger level. With the same process done on every single sample point, we will render an image that are sampled from 
+    texture image of different resolutions in different places in the frame.</p>
+    <p>Among these adjustments, adding sample rate is definitely more memory usage and slower speed since it bascially performing mulitple works for each single
+    pixel, but it does provides the most straight forward antialising effect. For pixel sampling, both methods run in similar speeds but bilinear definitely have higher antialiasing power. For level sampling, it is taking more memories 
+    ,though not much, and do take larger time to perform calculations, and it also has strong antialiasing power in texture sampling.</p>
+<div align="middle">
+    <table style="width=100%">
+        <tr>
+            <td>
+                <img src="images/part6_0_near.png" align="middle" width="400px" />
+                <figcaption align="middle">Level 0 & Nearest Pixel Sample</figcaption>
+            </td>
+            <td>
+                <img src="images/part6_0_linear.png" align="middle" width="400px" />
+                <figcaption align="middle">Level 0 & Lerp Pixel Sample</figcaption>
+            </td>
+        </tr>
+        <br />
+        <tr>
+            <td>
+                <img src="images/part6_near_near.png" align="middle" width="400px" />
+                <figcaption align="middle">Nearest Level & Nearest Pixel Sample</figcaption>
+            </td>
+            <td>
+                <img src="images/part6_near_linear.png" align="middle" width="400px" />
+                <figcaption align="middle">Nearest Level & Lerp Sample</figcaption>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<h2 align="middle">Section III: Art Competition</h2>
+<p>If you are not participating in the optional art competition, don't worry about this section!</p>
+
+<h3 align="middle">Part 7: Draw something interesting!</h3>
+
+</body>
 </html>
